@@ -1,4 +1,5 @@
-Trendyol Case
+T Calisma 
+
 
 1.1- Kubernetes Kurulumu
 Bu kurulum icin 2 Server kullanılacak; 1 Master,Node rolü olacak. (Server 0) 1 Node (Server 1)
