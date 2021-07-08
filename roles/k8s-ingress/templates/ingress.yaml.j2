@@ -275,8 +275,8 @@ metadata:
 spec:
   type: ClusterIP
   externalIPs:
-  - {{ hostvars['server-tugce-esen-0']['ansible_host'] }}
-  - {{ hostvars['server-tugce-esen-1']['ansible_host'] }}
+  - {{ hostvars['server-*****-0']['ansible_host'] }}
+  - {{ hostvars['server-*****-1']['ansible_host'] }}
   ports:
     - name: http
       port: 80
