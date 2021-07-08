@@ -1,2 +1,2 @@
-restriction_node: server-tugce-esen-1
-permisson_prometheus: server-tugce-esen-1
+restriction_node: server-*****-1
+permisson_prometheus: server-*****-1
