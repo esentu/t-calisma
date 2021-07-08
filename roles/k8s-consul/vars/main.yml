@@ -1,1 +1,1 @@
-consul_server: "{{ hostvars['server-tugce-esen-2']['ansible_host'] }}"
+consul_server: "{{ hostvars['server-*****-2']['ansible_host'] }}"
