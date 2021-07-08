@@ -1,1 +1,1 @@
-elasticsearch_ip: "{{ hostvars['server-tugce-esen-3']['ansible_host'] }}"
+elasticsearch_ip: "{{ hostvars['server-*****-3']['ansible_host'] }}"
