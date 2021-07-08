@@ -1,0 +1,31 @@
+---
+
+
+- include_tasks: k8s-var.yml
+  tags: install
+  when: node is defined
+
+- include_tasks: variables.yaml
+  tags: install
+  when: master is defined
+
+- include_tasks: common-k8s.yaml
+  tags: install
+
+- include_tasks: variables.yaml
+  tags: install
+
+- include_tasks: master.yml
+  tags: install
+  when: master is defined
+
+- include_tasks: flannel_conf.yaml
+  tags: install
+  when: master is defined
+
+- include_tasks: master_both_node.yml
+  tags: install
+  when: master is defined
+
+- include_tasks: node_join.yml
+  tags: install

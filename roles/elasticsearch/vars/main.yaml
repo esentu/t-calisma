@@ -1,0 +1,14 @@
+---
+
+#File Paths
+elasticsearch_data_path: /data/elasticsearch/data
+elasticsearch_log_path: /data/elasticsearch/log
+Djna_tmpdir: /usr/share/elasticsearch/tmp
+run_file: /var/run/elasticsearch
+
+#Cluster Info
+cluster_name: elasticsearch
+
+#Cluster Info
+xms_value: 1g
+xmx_value: 1g

@@ -1,0 +1,50 @@
+---
+- name: Creates directory
+  file:
+    path: /opt/fluentbit
+    state: directory
+  tags: fluentbit-install
+  when:
+    - master is defined
+
+- name: install yaml files
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: '0440'
+  with_items:
+    - { url: "https://raw.githubusercontent.com/fluent/fluent-bit-kubernetes-logging/master/fluent-bit-service-account.yaml" , dest: "/opt/fluentbit/fluent-bit-service-account.yaml" }
+    - { url: "https://raw.githubusercontent.com/fluent/fluent-bit-kubernetes-logging/master/fluent-bit-role.yaml" , dest: "/opt/fluentbit/fluent-bit-role.yaml" }
+    - { url: "https://raw.githubusercontent.com/fluent/fluent-bit-kubernetes-logging/master/fluent-bit-role-binding.yaml" , dest: "/opt/fluentbit/fluent-bit-role-binding.yaml" }
+  tags:
+    - fluentbit-install
+  when:
+    - master is defined
+
+
+- name: install yaml files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "fluentbit.yaml.j2" , dest: "/opt/fluentbit/fluentbit.yaml" }
+    - { src: "fluentbit-configmap.yaml.j2" , dest: "/opt/fluentbit/fluentbit-configmap.yaml" }
+  tags:
+    - fluentbit-install
+    - fluentbit-edit
+  when:
+    - master is defined
+
+- name: Create a Service object by reading the definition from a file
+  shell: kubectl apply -f "{{ item }}"
+  with_items:
+    - "/opt/fluentbit/fluent-bit-service-account.yaml"
+    - "/opt/fluentbit/fluent-bit-role.yaml"
+    - "/opt/fluentbit/fluent-bit-role-binding.yaml"
+    - "/opt/fluentbit/fluentbit-configmap.yaml"
+    - "/opt/fluentbit/fluentbit.yaml"
+  tags:
+    - fluentbit-install
+    - fluentbit-edit
+  when:
+    - master is defined

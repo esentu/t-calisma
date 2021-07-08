@@ -1,0 +1,67 @@
+---
+
+#Create data-log file
+- name: Creates elasticsearch data files
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    mode: 0775
+  with_items:
+    - "{{ elasticsearch_data_path }}"
+    - "{{ elasticsearch_log_path }}"
+    - "{{ Djna_tmpdir }}"
+    - "{{ run_file }}"
+  tags: elasticsearch-install
+
+- name: set elasticsearch specific sysctl parameters
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+    owner: "root"
+    group: "root"
+  with_items:
+    - { src: 'elasticsearch-limit.conf.j2', dest: '/etc/security/limits.d/elasticsearch.conf' }
+    - { src: 'elasticsearch-ctl.conf2.j2', dest: '/etc/sysctl.d/30-elasticsearch.conf' }
+    - { src: 'jvm.options.j2', dest: '/etc/elasticsearch/jvm.options' }
+    - { src: 'elasticsearch.yml.j2', dest: '/etc/elasticsearch/elasticsearch.yml' }
+    - { src: 'elasticsearch.service.j2', dest: '/usr/lib/systemd/system/elasticsearch.service' }
+  tags: elasticsearch-install
+
+- name: reload elasticsearch
+  command: systemctl daemon-reload
+  tags: elasticsearch-install
+
+- name: set elasticsearch specific sysctl parameters
+  lineinfile:
+    path: "{{ item.path }}"
+    state: present
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { path: '/etc/elasticsearch/log4j2.properties', regexp: 'appender.rolling.filePattern =', line: 'appender.rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}-%d{yyyy-MM-dd}.log.gz' }
+  changed_when: false
+  tags: elasticsearch-install
+
+- name: work-around solution for special chatacter in config files
+  replace:
+    path:  "{{ item.path }}"
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+    backup: yes
+  with_items:
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: '\, \]', replace: ' ]' }
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: '\, $', replace: ' ' }
+    - { path: '/etc/fstab', regexp: '^/dev/mapper/centos-swap', replace: '#/dev/mapper/centos-swap' }
+    - { path: '/etc/sysconfig/elasticsearch', regexp: '^\#MAX_LOCKED_MEMORY', replace: 'MAX_LOCKED_MEMORY' }
+  changed_when: false
+  tags: elasticsearch-install
+
+- name: restart elasticsearch
+  service:
+    name: elasticsearch
+    enabled: yes
+    state: restarted
+  tags: elasticsearch-install

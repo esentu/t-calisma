@@ -1,0 +1,74 @@
+- name:
+  yum:
+    name:
+      - epel-release
+    state: installed
+  tags:
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+
+- name:
+  yum:
+    name:
+      - snapd
+    state: installed
+  tags:
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+
+- name: install helm
+  service:
+    name: snapd.socket
+    state: started
+  tags:
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+
+
+- name: install helm
+  command: ln -s /var/lib/snapd/snap /snap
+  tags:
+    - first
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+  ignore_errors: yes
+
+
+- name: install helm
+  command: snap install helm --classic
+  tags:
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+  ignore_errors: yes
+
+- name: hel add consul repo
+  command: /var/lib/snapd/snap/bin/helm  repo add hashicorp https://helm.releases.hashicorp.com
+  tags:
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+  ignore_errors: yes
+
+
+- name: config map copy
+  template:
+    src: consul-config.j2
+    dest: $HOME/consul.yaml
+  tags:
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+
+
+- name: hel add consul repo
+  command: /var/lib/snapd/snap/bin/helm  install consul hashicorp/consul -f $HOME/consul.yaml
+  tags:
+    - k8s-install-consul-agent
+  when:
+    - master is defined
+  ignore_errors: yes

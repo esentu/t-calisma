@@ -1,0 +1,22 @@
+---
+- name: Cluster flannel Config
+  shell: kubectl apply -f {{ flannel_yml }}
+  ignore_errors: yes
+  when:
+    - master is defined
+  tags:
+    - flannel_conf
+    - install
+
+- name: reboot
+  reboot:
+  tags:
+    - install
+    - flannel_conf
+
+- name: K8S Container up wait (2 minute)
+  pause:
+    minutes: 2
+  tags:
+    - install
+    - flannel_conf

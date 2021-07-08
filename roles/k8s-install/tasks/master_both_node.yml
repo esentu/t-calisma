@@ -1,0 +1,34 @@
+- name: untaint master
+  shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+  when:
+    - master is defined
+  tags:
+    - master_both_node
+    - install
+
+- name: Add worker role
+  shell: kubectl label node '{{ inventory_hostname }}' node-role.kubernetes.io/worker=worker
+  when:
+    - master is defined
+  tags:
+    - master_both_node
+    - install
+
+- name: pubtoken
+  shell: openssl x509 -pubkey -in {{ key_file }} | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: pubtoken
+  when:
+    - master is defined
+  tags:
+    - node_join
+    - install
+
+- name: Add K8S Token and Hash to dummy host
+  add_host:
+    name:   "K8S_TOKEN_HOLDER"
+    hash:  "{{ pubtoken.stdout }}"
+  when:
+    - master is defined
+  tags:
+    - node_join
+    - install

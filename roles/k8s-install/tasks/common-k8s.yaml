@@ -1,0 +1,170 @@
+---
+- name: Swapoff disable
+  command: swapoff -a
+  ignore_errors: yes
+  tags: 
+    - install
+    - common
+  
+- name: Swapoff delete in fstab
+  command: sed -i "/swap/d" {{fstab_path}}
+  ignore_errors: yes
+  tags: 
+    - install
+    - common
+  
+- name: Selinux disable etme
+  selinux:
+    state: disabled
+    conf: "{{selinux_path}}"
+  ignore_errors: yes
+  tags: 
+    - install
+    - common
+  
+- name: Stop and disedbled firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+  tags: 
+    - install
+    - common
+  
+- name: Packages install open-vm-tools and net-tools
+  yum:
+    name:
+      - open-vm-tools
+      - net-tools
+    state: installed
+  ignore_errors: yes
+  tags: 
+    - install
+    - common
+  
+- name: Update
+  command: yum -y update
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+  
+- name: reboot
+  reboot:
+  tags:
+    - install
+    - common
+  
+- name: containerd modules load
+  copy:
+    dest:  "{{ containerd_modules_file }}"
+    content: |
+            overlay
+            br_netfilter
+  tags:
+    - install
+    - common
+  
+- name: Modprobe enable
+  command: "{{ item }} "
+  with_items:
+    - modprobe br_netfilter
+    - modprobe overlay
+  tags:
+    - install
+    - common
+  
+- name: Iptables config
+  copy:
+    dest:  "{{ iptables_file }}"
+    content: |
+              net.bridge.bridge-nf-call-iptables  = 1
+              net.ipv4.ip_forward                 = 1
+              net.bridge.bridge-nf-call-ip6tables = 1
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+  
+- name: Iptables enable
+  command: sysctl --system
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+
+- name: Iptables enable
+  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+
+- name: containerd installation
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - containerd.io
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+  
+- name: Containerd conf
+  command: mkdir -p /etc/containerd
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+
+  
+- name: Optimization for Journald Service
+  template:
+    src: "containerd.conf.j2"
+    dest: "/etc/containerd/config.toml"
+    mode: 0644
+    owner: "root"
+    group: "root"
+  tags:
+    - install
+    - common
+  
+- name: Restart service containerd, in all cases
+  service:
+    name: containerd
+    state: restarted
+    enabled: yes
+  tags:
+    - install
+    - common
+  
+- name: Optimization for Journald Service
+  template:
+    src: "kubernetes_repo.j2"
+    dest: "{{kubernetes_repo_file}}"
+    mode: 0644
+    owner: "root"
+    group: "root"
+  tags:
+    - install
+    - common
+  
+- name: Kubernetes install
+  command: yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+  
+- name: Enable kubelet
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
+  ignore_errors: yes
+  tags:
+    - install
+    - common
+  

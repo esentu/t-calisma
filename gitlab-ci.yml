@@ -1,0 +1,49 @@
+image: docker.io/tugceesen/ubuntu_ansible
+before_script:
+  - whoami
+  - apt-get update -qy #update system
+  - git submodule update --init
+  - ansible --version
+  - ansible-lint --version
+  - chmod 400 Tycase.pem
+  - export ANSIBLE_HOST_KEY_CHECKING=False # disable host key checking for ansible
+
+stages:
+  - prometheus_federation_server
+  - k8s-install-consul-agent
+  - prometheus-federations-edit
+  - alertmanager-install
+  - alert-add
+
+
+prometheus_federation_server :
+  stage: prometheus_federation_server
+  script: ansible-playbook --private-key Tycase.pem --user root site.yml -i hosts  -l prometheus_federation_server  --tags "prometheus-federations-install" -vv --flush-cache
+  tags: 
+    - kk
+
+k8s-install-consul-agent:
+  stage: k8s-install-consul-agent
+  script: ansible-playbook --private-key Tycase.pem --user root site.yml -i hosts  -l k8s_group  --tags "k8s-install-consul-agent" -vv --flush-cache
+  tags: 
+    - kk
+
+prometheus-federations-edit:
+  stage: prometheus-federations-edit
+  script: ansible-playbook --private-key Tycase.pem --user root site.yml -i hosts  -l prometheus_federation_server  --tags "prometheus-federations-edit" -vv --flush-cache
+  tags: 
+    - kk
+
+alertmanager-install:
+  stage: alertmanager-install
+  script: ansible-playbook --private-key Tycase.pem --user root site.yml -i hosts  -l alertmanager_servers   --tags "alertmanager-install" -vv --flush-cache
+  tags: 
+    - kk
+
+alert-add:
+  stage: alert-add
+  script: ansible-playbook --private-key Tycase.pem --user root site.yml -i hosts  -l alertmanager_servers   --tags "alert-add" -vv --flush-cache
+  tags: 
+    - kk
+
+

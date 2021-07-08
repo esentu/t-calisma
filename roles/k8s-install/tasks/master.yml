@@ -1,0 +1,45 @@
+---
+- name: Optimization for Journald Service
+  template:
+    src: "ClusterConfiguration.j2"
+    dest: "{{ init_conf_file }}"
+    mode: 0644
+    owner: "root"
+    group: "root"
+  when:
+    - master is defined
+  tags:
+    - install
+    - master
+    
+- name: Cluster CNI Config
+  shell: kubeadm init  --config={{ init_conf_file }}  --cri-socket {{ cri_socket }}
+  register: output
+  ignore_errors: yes
+  when:
+    - master is defined
+  tags:
+    - install
+    - master
+
+- name: Init requirement copy file
+  shell: |
+          mkdir -p $HOME/.kube
+          sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
+          sudo chown $(id -u):$(id -g) $HOME/.kube/config
+  ignore_errors: yes
+  when:
+    - master is defined
+  tags:
+    - install
+    - master
+
+- name: K8S Container up wait (2 minute)
+  pause:
+    minutes: 2
+  when:
+    - master is defined
+  tags:
+    
+    - install
+    - master

@@ -1,0 +1,8 @@
+cluster.name: {{ cluster_name }}
+node.name: {{ ansible_hostname }}
+path.data: {{ elasticsearch_data_path }}
+path.logs: {{ elasticsearch_log_path }}
+network.host: 0.0.0.0
+http.port: 9200
+discovery.type: single-node
+

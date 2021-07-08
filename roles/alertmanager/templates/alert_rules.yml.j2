@@ -1,0 +1,8 @@
+groups:
+- name: Pods
+  rules:
+  - alert: pod_restart
+    expr: rate(kube_pod_container_status_restarts_total{container="prometheus"}[90s]) > 0
+    for: 90s
+    labels:
+      severity: critical

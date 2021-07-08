@@ -1,0 +1,15 @@
+- name: copy grafana.yaml
+  template:
+    src: grafana.yaml.j2
+    dest: $HOME/grafana.yaml
+  tags:
+    - k8s-grafana-install
+  when:
+    - master is defined
+
+- name: grafana install
+  command: kubectl apply -f $HOME/grafana.yaml
+  tags:
+    - k8s-grafana-install
+  when:
+    - master is defined

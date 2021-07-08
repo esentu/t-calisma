@@ -1,0 +1,11 @@
+- name: restrict deployment on node
+  command: kubectl taint nodes {{ restriction_node }} special=true:NoSchedule
+  tags: restrict_deployment
+  when:
+    - master is defined
+
+- name: apply files
+  shell: kubectl apply -f /opt/prometheus/prometheus-deployment.yaml
+  tags: permission_prometheus
+  when:
+    - master is defined

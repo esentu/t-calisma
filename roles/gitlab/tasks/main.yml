@@ -1,0 +1,24 @@
+- name: packages install
+  yum:
+    name:
+      - curl
+      - policycoreutils-python
+      - openssh-server
+      - perl
+  tags:
+    - gitlab
+- name: sshd  enabled
+  service:
+    name: sshd
+    state: started
+    enabled: yes
+- name: test
+  shell: curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+  tags:
+    - gitlab
+
+- name: packages install
+  shell: sudo EXTERNAL_URL="http://gitlab.esentu.com" yum install -y gitlab-ce
+  tags:
+    - gitlab
+

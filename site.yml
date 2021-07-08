@@ -1,0 +1,53 @@
+- name: K8s common
+  hosts: k8s_group
+  become: yes
+  become_user: root
+
+  roles:
+    - k8s-install
+    - k8s-statemetric
+    - k8s-prometheus
+    - case_1.3
+    - k8s-ingress
+    - k8s-consul
+    - k8s-grafana
+    - grafana-add
+    - k8s-fluentbit
+
+
+- name: consul common
+  hosts: consul_server
+  become: yes
+  become_user: root
+  roles:
+    - consul-install
+
+
+- name: federations-prometheus
+  hosts: prometheus_federation_server
+  become: yes
+  become_user: root
+  roles:
+    - Prometheus-federation
+
+- name: alertmanager
+  hosts: alertmanager_servers
+  become: yes
+  become_user: root
+  roles:
+    - alertmanager
+
+- name: elasticsearch
+  hosts: elasticsearch_servers
+  become: yes
+  become_user: root
+  roles:
+    - elasticsearch
+    - kibana
+
+- name: gitlab
+  hosts: gitlab_servers
+  become: yes
+  become_user: root
+  roles:
+    - gitlab

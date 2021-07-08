@@ -1,0 +1,9 @@
+data_dir = "/opt/consul"
+client_addr = "0.0.0.0"
+server = true
+bind_addr = "{{ ansible_default_ipv4.address }}"
+advertise_addr = "{{ ansible_default_ipv4.address }}"
+bootstrap_expect = 1
+ui_config{
+  enabled = true
+}

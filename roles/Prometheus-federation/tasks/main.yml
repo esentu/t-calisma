@@ -1,0 +1,118 @@
+- name: user-add prometheus
+  user:
+    name: prometheus
+    shell: /bin/false
+    system: true
+    append: yes
+  tags:
+    - prometheus-federations-install
+
+- name: create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - "/etc/prometheus"
+    - "/var/lib/prometheus"
+  tags:
+    - prometheus-federations-install
+
+- name: Download tar
+  get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v2.18.1/prometheus-2.18.1.linux-amd64.tar.gz
+    dest: $HOME/prometheus-2.18.1.linux-amd64.tar.gz
+    mode: '0440'
+  tags:
+    - prometheus-federations-install
+
+- name: test
+  unarchive:
+    src: $HOME/prometheus-2.18.1.linux-amd64.tar.gz
+    dest: $HOME
+    remote_src: true
+  tags:
+    - prometheus-federations-install
+
+- name: copy
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+    remote_src: yes
+  with_items:
+    - { src: "$HOME/prometheus-2.18.1.linux-amd64/prometheus" , dest: "/usr/local/bin/prometheus"}
+    - { src: "$HOME/prometheus-2.18.1.linux-amd64/promtool" , dest: "/usr/local/bin/promtool"}
+    - { src: "$HOME/prometheus-2.18.1.linux-amd64/prometheus.yml" , dest: "/etc/prometheus/prometheus.yml"}
+  tags:
+    - prometheus-federations-install
+
+- name: copy files2
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+  with_items:
+    - { src: "$HOME/prometheus-2.18.1.linux-amd64/consoles" , dest: "/etc/prometheus/consoles"}
+    - { src: "$HOME/prometheus-2.18.1.linux-amd64/console_libraries" , dest: "/etc/prometheus/console_libraries"}
+  tags:
+    - prometheus-federations-install
+
+
+- name: Change kubeconfig file permission
+  file:
+    path: "{{ item }}"
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - "/usr/local/bin/prometheus"
+    - "/usr/local/bin/promtool"
+    - "/etc/prometheus/prometheus.yml"
+  tags:
+    - prometheus-federations-install
+
+
+- name: Change kubeconfig file permission
+  file:
+    path: "{{ item }}"
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - "/etc/prometheus/consoles"
+    - "/etc/prometheus/console_libraries"
+  tags:
+    - prometheus-federations-install
+
+
+- name: configure prometheus service
+  template:
+    src: "prometheus.service.j2"
+    dest: "/etc/systemd/system/prometheus.service"
+  tags:
+    - prometheus-federations-install
+
+
+- name: configure prometheus service
+  template:
+    src: "prometheus.yaml.j2"
+    dest: "/etc/prometheus/prometheus.yml"
+    owner: prometheus
+    group: prometheus
+  tags:
+    - prometheus-federations-install
+    - prometheus-federations-edit
+
+- name: Daemon reload
+  command: systemctl daemon-reload
+  tags:
+    - prometheus-federations-install
+
+- name: Service enable restart
+  service:
+    name: prometheus
+    state: started
+    enabled: true
+  tags:
+    - prometheus-federations-install
+    - prometheus-federations-edit

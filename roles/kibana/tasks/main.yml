@@ -1,0 +1,61 @@
+---
+- name: Install Packages
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+  - java
+  - jna
+  tags: kibana-install
+
+  #some initial commands
+- name: Swap Disable & tmp dir create for kibana
+  shell: |
+   swapoff -a
+  args:
+   executable: /bin/bash
+  changed_when: false
+  tags: kibana-install
+
+    # Install kibana rpm if it's not installed
+- name: Check if kibana is installed
+  shell: |
+   rpm -qa |egrep "kibana" || echo "kibana is not installed"
+  args:
+   executable: /bin/bash
+  register: kibana_rpm_check
+  changed_when: false
+  tags: kibana-install
+
+- name: Enable elasticsearch yum repo and install the package
+  template:
+    src: "elasticsearch.repo.j2"
+    dest: "/etc/yum.repos.d/elasticsearch-7.x.repo"
+    mode: 0644
+    owner: "root"
+    group: "root"
+  when:
+    - kibana_rpm_check.stdout == "kibana is not installed"
+  tags: kibana-install
+
+- name: Install kibana
+  yum: name=kibana state=present
+  when:
+   - kibana_rpm_check.stdout == "kibana is not installed"
+  tags: kibana-install
+
+- name: set kibana specific yaml
+  template:
+    src: kibana.yml.j2
+    dest: /etc/kibana/kibana.yml
+    mode: 0644
+    owner: "root"
+    group: "root"
+  tags: kibana-install
+
+- name: restart kibana
+  service:
+    name: kibana
+    enabled: yes
+    state: restarted
+  tags: kibana-install

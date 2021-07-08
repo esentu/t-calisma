@@ -1,0 +1,16 @@
+selinux_path: "/etc/selinux/config"
+fstab_path: "/etc/fstab"
+iptables_file: "/etc/sysctl.d/99-kubernetes-cri.conf"
+init_conf_file: "$HOME/ClusterConfiguration.yml"
+kubernetes_repo_file: "/etc/yum.repos.d/kubernetes.repo"
+containerd_modules_file: "/etc/modules-load.d/containerd.conf"
+flannel_yml: "https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml"
+key_file: "/etc/kubernetes/pki/ca.crt"
+cluster_name: case-tugce-esen
+cri_socket: /run/containerd/containerd.sock
+cidr_subnet: 10.244.0.0/16
+cidr_ip: 10.244.0.0
+token_path: "/etc/ansible/kubernetes/join_token"
+token: abcdef.0123456789abcdef
+
+

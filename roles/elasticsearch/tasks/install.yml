@@ -1,0 +1,46 @@
+---
+- name: Install Packages
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - java
+    - jna
+  tags: elasticsearch-install
+  
+#some initial commands
+- name: Swap Disable & tmp dir create for elasticsearch
+  shell: |
+    swapoff -a
+  args:
+    executable: /bin/bash
+  changed_when: false
+  tags: elasticsearch-install
+
+# Install elasticsearch rpm if it's not installed
+- name: Check if elasticsearch is installed
+  shell: |
+    rpm -qa |egrep "elasticsearch" || echo "elasticsearch is not installed"
+  args:
+    executable: /bin/bash
+  register: elasticsearch_rpm_check
+  changed_when: false
+  tags: elasticsearch-install
+
+- name: Enable elasticsearch yum repo and install the package
+  template:
+    src: "elasticsearch.repo.j2"
+    dest: "/etc/yum.repos.d/elasticsearch-7.x.repo"
+    mode: 0644
+    owner: "root"
+    group: "root"
+  when:
+    - elasticsearch_rpm_check.stdout == "elasticsearch is not installed"
+  tags: elasticsearch-install
+
+- name: Install elasticsearch
+  yum: name=elasticsearch state=present
+  when:
+    - elasticsearch_rpm_check.stdout == "elasticsearch is not installed"
+  tags: elasticsearch-install
+

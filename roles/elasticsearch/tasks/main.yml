@@ -1,0 +1,7 @@
+---
+
+- include_tasks: install.yml
+  tags: elasticsearch-install
+
+- include_tasks: configure.yml
+  tags: elasticsearch-install

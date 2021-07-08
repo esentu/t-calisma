@@ -1,0 +1,47 @@
+---
+- name: copy files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "dashboard-1.json.j2", dest: "dashboard-1.json"}
+    - { src: "datasource-prometheus.json.j2", dest: "datasource-prometheus.json"}
+  tags:
+    - grafana-adding
+  when:
+    - master is defined
+
+- name: datasource-prometheus adding
+  uri:
+    url: http://grafana.esentu.com/api/datasources
+    user: "{{ user }}"
+    password: "{{ password }}"
+    unsafe_writes: yes
+    force_basic_auth: yes
+    method: POST
+    src: datasource-prometheus.json
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    remote_src: yes
+  tags:
+    - grafana-adding
+  when:
+    - master is defined
+- name: dashbord-1 adding
+  uri:
+    url: http://grafana.esentu.com/api/dashboards/db
+    user: "{{ user }}"
+    password: "{{ password }}"
+    unsafe_writes: yes
+    force_basic_auth: yes
+    method: POST
+    src: dashboard-1.json
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    remote_src: yes
+  tags:
+    - grafana-adding
+  when:
+    - master is defined

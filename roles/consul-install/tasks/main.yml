@@ -1,0 +1,61 @@
+---
+- name: yum update
+  command: yum update -y
+  tags:
+    - consul-server-install
+    - consul-package-install
+
+- name: Packages install open-vm-tools and net-tools
+  yum:
+    name:
+      - yum-utils
+      - gnupg2
+      - wget
+      - net-tools
+    state: installed
+  ignore_errors: yes
+  tags:
+    - consul-server-install
+    - consul-package-install
+
+- name: yum update
+  shell: yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+  tags:
+    - consul-server-install
+    - consul-package-install
+
+- name: Packages install open-vm-tools and net-tools
+  yum:
+    name: consul
+    state: installed
+  ignore_errors: yes
+  tags:
+    - consul-server-install
+    - consul-package-install
+
+- name: Optimization for Journald Service
+  template:
+    src: "consul.hcl_server.j2"
+    dest: "/etc/consul.d/consul.hcl"
+  tags:
+    - consul-server-install
+
+
+- name: Restart service containerd, in all cases
+  service:
+    name: consul
+    state: started
+    enabled: yes
+  tags:
+    - consul-server-install
+
+- name: Restart service containerd, in all cases
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+  tags:
+    - consul-server-install
+
+
+

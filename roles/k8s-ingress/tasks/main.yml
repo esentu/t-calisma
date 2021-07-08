@@ -1,0 +1,26 @@
+---
+- name: Creates directory
+  file:
+    path: /opt/ingress
+    state: directory
+  tags: ingress-install
+  when:
+    - master is defined
+
+- name: install yaml files
+  template:
+    src: ingress.yaml.j2
+    dest: /opt/ingress/ingress.yaml
+  tags:
+    - ingress-install
+    - ingress-edit
+  when:
+    - master is defined
+
+- name: apply files
+  shell: kubectl apply -f /opt/ingress/ingress.yaml
+  tags:
+    - ingress-install
+    - ingress-edit
+  when:
+    - master is defined

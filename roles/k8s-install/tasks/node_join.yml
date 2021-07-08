@@ -1,0 +1,17 @@
+---
+
+- name: Add node to cluster
+  shell: kubeadm join {{ hostvars['K8S_MASTER_HOLDER']['api_addr'] }}:6443 --token {{ token }}  --discovery-token-ca-cert-hash  sha256:{{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}
+  when:
+    - node is defined
+  tags:
+    - node_join
+    - install
+
+- name: add worker role
+  shell:  kubectl label node {{ hostvars['K8S_NODE_HOLDER']['node_server'] }} node-role.kubernetes.io/worker=worker
+  when:
+    - master is defined
+  tags:
+    - node_join
+    - install

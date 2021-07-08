@@ -1,0 +1,54 @@
+---
+- name: Creates directory
+  file:
+    path: /opt/prometheus
+    state: directory
+  tags:
+    - prometheus-install
+  when:
+    - master is defined
+
+- name: install yaml files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "prometheus-deployment.yaml.j2" , dest: "/opt/prometheus/promotheus-deployment.yaml" }
+    - { src: "prometheus-service.yaml.j2" , dest: "/opt/prometheus/promotheus-service.yaml" }
+    - { src: "prometheus-clusterrole.yaml.j2" , dest: "/opt/prometheus/promotheus-clusterrole.yaml" }
+    - { src: "prometheus-configmap.yaml.j2" , dest: "/opt/prometheus/promotheus-configmap.yaml"}
+    - { src: "prometheus-ingress.yaml.j2" , dest: "/opt/prometheus/promotheus-ingress.yaml"}
+  tags:
+    - prometheus-install
+    - prometheus-edit
+  when:
+    - master is defined
+
+- name: Create a k8s namespace
+  shell: kubectl create namespace monitoring
+  tags:
+    - prometheus-install
+  when:
+    - master is defined
+  ignore_errors: yes
+
+- name: apply files
+  shell: kubectl apply -f "{{ item }}"
+  with_items:
+    - "/opt/prometheus/promotheus-clusterrole.yaml"
+    - "/opt/prometheus/promotheus-service.yaml"
+    - "/opt/prometheus/promotheus-configmap.yaml"
+    - "/opt/prometheus/promotheus-deployment.yaml"
+  tags:
+    - prometheus-install
+    - prometheus-edit
+  when:
+    - master is defined
+
+
+- name: apply files
+  shell: kubectl apply -f /opt/prometheus/promotheus-ingress.yaml
+  tags:
+    - prometheus-ingress
+  when:
+    - master is defined

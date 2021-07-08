@@ -1,0 +1,41 @@
+---
+- name: Creates directory
+  file:
+    path: /opt/kube-state-metrics
+    state: directory
+  tags:
+    - kube-state-metrics-install
+    - kube-state-metrics-edit
+  when:
+    - master is defined
+
+- name: install yaml files
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: '0440'
+  with_items:
+    - { url: "https://raw.githubusercontent.com/kubernetes/kube-state-metrics/master/examples/standard/cluster-role-binding.yaml" , dest: "/opt/kube-state-metrics/cluster-role-binding.yaml" }
+    - { url: "https://raw.githubusercontent.com/kubernetes/kube-state-metrics/master/examples/standard/cluster-role.yaml" , dest: "/opt/kube-state-metrics/cluster-role.yaml" }
+    - { url: "https://raw.githubusercontent.com/kubernetes/kube-state-metrics/master/examples/standard/service-account.yaml" , dest: "/opt/kube-state-metrics/service-account.yaml" }
+    - { url: "https://raw.githubusercontent.com/kubernetes/kube-state-metrics/master/examples/standard/service.yaml" , dest: "/opt/kube-state-metrics/service.yaml"}
+    - { url: "https://raw.githubusercontent.com/kubernetes/kube-state-metrics/master/examples/standard/deployment.yaml" , dest: "/opt/kube-state-metrics/deployment.yaml"}
+  tags:
+    - kube-state-metrics-install
+    - kube-state-metrics-edit
+  when:
+    - master is defined
+
+- name: Create a Service object by reading the definition from a file
+  shell: kubectl apply -f "{{ item }}"
+  with_items:
+    - "/opt/kube-state-metrics/cluster-role.yaml"
+    - "/opt/kube-state-metrics/cluster-role-binding.yaml"
+    - "/opt/kube-state-metrics/service-account.yaml"
+    - "/opt/kube-state-metrics/service.yaml"
+    - "/opt/kube-state-metrics/deployment.yaml"
+  tags:
+    - kube-state-metrics-install
+    - kube-state-metrics-edit
+  when:
+    - master is defined

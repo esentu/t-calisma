@@ -1,0 +1,102 @@
+- name: user-add alertmanager
+  user:
+    name: alertmanager
+    shell: /bin/false
+    system: true
+    append: yes
+  tags:
+    - alertmanager-install
+- name: create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: alertmanager
+    group: alertmanager
+  with_items:
+    - "/etc/alertmanager"
+    - "/data/alertmanager"
+  tags:
+    - alertmanager-install
+
+- name: Download tar
+  get_url:
+    url: https://github.com/prometheus/alertmanager/releases/download/v0.22.0/alertmanager-0.22.0.linux-amd64.tar.gz
+    dest: $HOME/alertmanager-0.22.0.linux-amd64.tar.gz
+    mode: '0440'
+  tags:
+    - alertmanager-install
+
+- name: test
+  unarchive:
+    src: $HOME/alertmanager-0.22.0.linux-amd64.tar.gz
+    dest: $HOME
+    remote_src: true
+  tags:
+    - alertmanager-install
+
+- name: copy
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+    remote_src: yes
+  with_items:
+    - { src: "$HOME/alertmanager-0.22.0.linux-amd64/alertmanager" , dest: "/usr/local/bin/alertmanager"}
+    - { src: "$HOME/alertmanager-0.22.0.linux-amd64/amtool" , dest: "/usr/local/bin/amtool"}
+    - { src: "$HOME/alertmanager-0.22.0.linux-amd64/alertmanager.yml" , dest: "/etc/alertmanager/alertmanager.yml"}
+  tags:
+    - alertmanager-install
+
+
+- name: Change kubeconfig file permission
+  file:
+    path: "{{ item }}"
+    owner: alertmanager
+    group: alertmanager
+  with_items:
+    - "/usr/local/bin/alertmanager"
+    - "/usr/local/bin/alertmanager"
+    - "/etc/alertmanager/alertmanager.yml"
+  tags:
+    - alertmanager-install
+
+
+
+- name: configure alertmanager service
+  template:
+    src: "alertmanager.service.j2"
+    dest: "/etc/systemd/system/alertmanager.service"
+  tags:
+    - alertmanager-install
+
+
+- name: Daemon reload
+  command: systemctl daemon-reload
+  tags:
+    - alertmanager-install
+
+
+- name: configure alertmanager service
+  template:
+    src: "alert_rules.yml.j2"
+    dest: "/etc/prometheus/alert_rules.yml"
+  tags:
+    - alert-add
+
+- name: Service enable restart
+  service:
+    name: alertmanager
+    state: started
+    enabled: true
+  tags:
+    - alertmanager-install
+    - alert-add
+
+- name: Service enable restart
+  service:
+    name: prometheus
+    state: restarted
+    enabled: true
+  tags:
+    - alertmanager-install
+    - alert-add
