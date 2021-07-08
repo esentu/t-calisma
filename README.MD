@@ -21,8 +21,8 @@ dns mode: coredns
 
 ````
     NAME                  STATUS   ROLES                         AGE   VERSION
-    server-tugce-esen-0   Ready    control-plane,master,worker   9h    v1.21.2
-    server-tugce-esen-1   Ready    worker                        8h    v1.21.2
+    server-*****-0   Ready    control-plane,master,worker   9h    v1.21.2
+    server-*****-1   Ready    worker                        8h    v1.21.2
 ````
 
 ````
