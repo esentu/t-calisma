@@ -1,1 +1,1 @@
-elasticsearch_nodes: "[\"http://{{ hostvars['server-tugce-esen-3']['ansible_host'] }}:9200\"]"
+elasticsearch_nodes: "[\"http://{{ hostvars['server-*****-3']['ansible_host'] }}:9200\"]"
