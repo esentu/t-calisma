@@ -1,21 +1,20 @@
 [k8s_group]
-server-tugce-esen-0 ansible_host=8.208.16.223 master=true
-server-tugce-esen-1 ansible_host=8.208.13.50  node=true
+server-*****-0 ansible_host=8.*.*.* master=true
+server-*****-1 ansible_host=8.*.*.*  node=true
 
 [consul_server]
-server-tugce-esen-2 ansible_host=8.208.3.166
+server-*****-2 ansible_host=8.*.*.*
 
 [prometheus_federation_server]
-server-tugce-esen-2 ansible_host=8.208.3.166
+server-*****-2 ansible_host=8.*.*.*
 
 [alertmanager_servers]
-server-tugce-esen-2 ansible_host=8.208.3.166
+server-*****-2 ansible_host=8.*.*.*
 
 [gitlab_servers]
-server-tugce-esen-2 ansible_host=8.208.3.166
+server-*****-2 ansible_host=8.*.*.*
 
 [elasticsearch_servers]
-server-tugce-esen-3 ansible_host=8.208.113.119
-
+server-*****-3 ansible_host=8.*.*.*
 [gitlab_server]
-server-tugce-esen-3 ansible_host=8.208.113.119
+server-*****-3 ansible_host=8.*.*.*
